@@ -2,7 +2,7 @@
 {
     public class Blog
     {
-        public Guid Id { get; set; }         
+        public Guid Id { get; set; } = Guid.NewGuid();
         public required string Title { get; set; }      
         public required string Description { get; set; } 
         public required string Location { get; set; }  
