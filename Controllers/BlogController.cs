@@ -123,5 +123,95 @@ namespace Dayli_Blog.Controllers
 
             return CreatedAtAction(nameof(GetBlogById), new { id = blog.Id }, response);
         }
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateBlog(Guid id, [FromForm] UpdateBlogDto dto)
+        {
+            // ── Step 1: Blog খুঁজে বের করো ────────────────────
+            var blog = await dbContext.Blogs.FindAsync(id);
+
+            if (blog is null)
+                return NotFound("Blog is not exist!");
+
+            // ── Step 2: Text fields update করো ─────────────────
+            if (!string.IsNullOrEmpty(dto.Title))
+                blog.Title = dto.Title;
+
+            if (!string.IsNullOrEmpty(dto.Description))
+                blog.Description = dto.Description;
+
+            if (!string.IsNullOrEmpty(dto.Location))
+                blog.Location = dto.Location;
+
+            // ── Step 3: Image update করো ───────────────────────
+            if (dto.Image is not null && dto.Image.Length > 0)
+            {
+                // পুরনো image delete করো
+                if (!string.IsNullOrEmpty(blog.ImagePath))
+                {
+                    var oldFilePath = Path.Combine(environment.WebRootPath, blog.ImagePath);
+                    if (System.IO.File.Exists(oldFilePath))
+                        System.IO.File.Delete(oldFilePath);
+                }
+
+                // নতুন image save করো
+                var fileName = Guid.NewGuid().ToString()
+                               + Path.GetExtension(dto.Image.FileName);
+
+                var folderPath = Path.Combine(environment.WebRootPath, "images");
+
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                var fullFilePath = Path.Combine(folderPath, fileName);
+
+                await using var stream = new FileStream(fullFilePath, FileMode.Create);
+                await dto.Image.CopyToAsync(stream);
+
+                blog.ImagePath = $"images/{fileName}";
+            }
+
+            // ── Step 4: DB Save ─────────────────────────────────
+            await dbContext.SaveChangesAsync();
+            // UpdatedAt → DbContext এ automatically set হবে ✅
+
+            // ── Step 5: Response ────────────────────────────────
+            var response = new BlogResponseDto
+            {
+                Id = blog.Id,
+                Title = blog.Title,
+                Description = blog.Description,
+                Location = blog.Location,
+                ImagePath = blog.ImagePath,
+                CreatedAt = blog.CreatedAt,
+                UpdatedAt = blog.UpdatedAt
+            };
+
+            return Ok(response);
+        }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteBlog(Guid id)
+        {
+            // ── Step 1: Blog খুঁজে বের করো ────────────────────
+            var blog = await dbContext.Blogs.FindAsync(id);
+
+            if (blog is null)
+                return NotFound("Blog পাওয়া যায়নি!");
+
+            // ── Step 2: Image delete করো ───────────────────────
+            if (!string.IsNullOrEmpty(blog.ImagePath))
+            {
+                var oldFilePath = Path.Combine(environment.WebRootPath, blog.ImagePath);
+                if (System.IO.File.Exists(oldFilePath))
+                    System.IO.File.Delete(oldFilePath);
+            }
+
+            // ── Step 3: DB থেকে delete করো ────────────────────
+            dbContext.Blogs.Remove(blog);
+            await dbContext.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
