@@ -13,31 +13,29 @@ builder.Services.AddSwaggerGen();
 
 // DB context add
 //builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+//    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IImageService, ImageService>();
+//builder.Services.AddScoped<IImageService, ImageService>();
 
 // CORS add
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReactApp", policy =>
-    {
-        if (builder.Environment.IsDevelopment())
-        {
-            policy.AllowAnyOrigin()
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        }
-        else
-        {
-            policy.WithOrigins("https://your-production-url.com")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        }
-    });
-});
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowReactApp", policy =>
+//    {
+//        if (builder.Environment.IsDevelopment())
+//        {
+//            policy.AllowAnyOrigin()
+//                  .AllowAnyHeader()
+//                  .AllowAnyMethod();
+//        }
+//        else
+//        {
+//            policy.WithOrigins("https://your-production-url.com")
+//                  .AllowAnyHeader()
+//                  .AllowAnyMethod();
+//        }
+//    });
+//});
 
 var app = builder.Build();
 
