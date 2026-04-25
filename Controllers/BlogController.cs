@@ -1,6 +1,7 @@
 ﻿using Dayli_Blog.Data;
 using Dayli_Blog.Models.DTOs;
 using Dayli_Blog.Models.Entities;
+using Dayli_Blog.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,13 +13,14 @@ namespace Dayli_Blog.Controllers
     public class BlogController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
-        private readonly IWebHostEnvironment environment; // for image
+        //private readonly IWebHostEnvironment environment; // for image local
+        private readonly IImageService imageService; // for image cloud
 
 
-        public BlogController(ApplicationDbContext dbContext, IWebHostEnvironment environment)
+        public BlogController(ApplicationDbContext dbContext, IImageService imageService)
         {
             this.dbContext = dbContext;
-            this.environment = environment;
+            this.imageService = imageService;
         }
 
         [HttpGet]
@@ -71,29 +73,7 @@ namespace Dayli_Blog.Controllers
             // ── Step 1: Image handling ──────────────────────────
             if (dto.Image is not null && dto.Image.Length > 0)
             {
-                // Unique file name তৈরি করো
-                var fileName = Guid.NewGuid().ToString()
-                               + Path.GetExtension(dto.Image.FileName);
-                // "a1b2c3d4-xxxx.jpg"
-
-                // wwwroot/images folder এর full path
-                var folderPath = Path.Combine(environment.WebRootPath, "images");
-
-                // Folder না থাকলে তৈরি করো
-                if (!Directory.Exists(folderPath))
-                    Directory.CreateDirectory(folderPath);
-
-                // Full file path
-                var fullFilePath = Path.Combine(folderPath, fileName);
-                // "C:/project/wwwroot/images/a1b2c3d4-xxxx.jpg"
-
-                // File টা wwwroot/images এ save করো
-                await using var stream = new FileStream(fullFilePath, FileMode.Create);
-                await dto.Image.CopyToAsync(stream);
-
-                // DB তে শুধু relative path রাখো
-                imagePath = $"images/{fileName}";
-                // "images/a1b2c3d4-xxxx.jpg"
+                imagePath = await imageService.UploadImageAsync(dto.Image);
             }
 
             // ── Step 2: Blog object তৈরি ───────────────────────
@@ -146,29 +126,12 @@ namespace Dayli_Blog.Controllers
             // ── Step 3: Image update করো ───────────────────────
             if (dto.Image is not null && dto.Image.Length > 0)
             {
-                // পুরনো image delete করো
+                // পুরনো image Cloudinary থেকে delete
                 if (!string.IsNullOrEmpty(blog.ImagePath))
-                {
-                    var oldFilePath = Path.Combine(environment.WebRootPath, blog.ImagePath);
-                    if (System.IO.File.Exists(oldFilePath))
-                        System.IO.File.Delete(oldFilePath);
-                }
+                    await imageService.DeleteImageAsync(blog.ImagePath);
 
-                // নতুন image save করো
-                var fileName = Guid.NewGuid().ToString()
-                               + Path.GetExtension(dto.Image.FileName);
-
-                var folderPath = Path.Combine(environment.WebRootPath, "images");
-
-                if (!Directory.Exists(folderPath))
-                    Directory.CreateDirectory(folderPath);
-
-                var fullFilePath = Path.Combine(folderPath, fileName);
-
-                await using var stream = new FileStream(fullFilePath, FileMode.Create);
-                await dto.Image.CopyToAsync(stream);
-
-                blog.ImagePath = $"images/{fileName}";
+                // নতুন image upload
+                blog.ImagePath = await imageService.UploadImageAsync(dto.Image);
             }
 
             // ── Step 4: DB Save ─────────────────────────────────
@@ -202,9 +165,7 @@ namespace Dayli_Blog.Controllers
             // ── Step 2: Image delete করো ───────────────────────
             if (!string.IsNullOrEmpty(blog.ImagePath))
             {
-                var oldFilePath = Path.Combine(environment.WebRootPath, blog.ImagePath);
-                if (System.IO.File.Exists(oldFilePath))
-                    System.IO.File.Delete(oldFilePath);
+                await imageService.DeleteImageAsync(blog.ImagePath);
             }
 
             // ── Step 3: DB থেকে delete করো ────────────────────
