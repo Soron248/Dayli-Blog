@@ -30,7 +30,7 @@ builder.Services.AddCors(options =>
         }
         else
         {
-            policy.WithOrigins("https://blog-eight-lac-37.vercel.app")
+            policy.WithOrigins("https://blog-eight-lac-37.vercel.app", "http://localhost:3000")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         }
