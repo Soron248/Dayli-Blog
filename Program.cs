@@ -52,4 +52,16 @@ app.UseStaticFiles();
 app.UseAuthorization();
 app.MapControllers();
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-app.Run($"http://0.0.0.0:{port}");
+// ✅ এটা add করো
+try
+{
+    app.Run($"http://0.0.0.0:{port}");
+}
+catch (Exception ex)
+{
+    Console.WriteLine("=== STARTUP ERROR ===");
+    Console.WriteLine(ex.GetType().FullName);
+    Console.WriteLine(ex.Message);
+    Console.WriteLine(ex.StackTrace);
+    throw;
+}
