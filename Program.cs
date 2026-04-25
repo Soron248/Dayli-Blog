@@ -1,4 +1,5 @@
 ﻿using Dayli_Blog.Data;
+using Dayli_Blog.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,8 @@ builder.Services.AddSwaggerGen();
 // DB context add
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IImageService, ImageService>();
 
 // CORS add
 builder.Services.AddCors(options =>
