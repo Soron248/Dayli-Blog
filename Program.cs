@@ -30,7 +30,7 @@ builder.Services.AddCors(options =>
         }
         else
         {
-            policy.WithOrigins("https://your-production-url.com")
+            policy.WithOrigins("https://blog-eight-lac-37.vercel.app")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         }
