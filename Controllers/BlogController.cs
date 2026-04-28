@@ -2,6 +2,7 @@
 using Dayli_Blog.Models.DTOs;
 using Dayli_Blog.Models.Entities;
 using Dayli_Blog.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace Dayli_Blog.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BlogController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;

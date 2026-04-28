@@ -3,6 +3,7 @@ using System;
 using Dayli_Blog.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dayli_Blog.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260428152414_AddUserTable")]
+    partial class AddUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,14 +74,6 @@ namespace Dayli_Blog.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
-                            Email = "srn@email.com",
-                            PasswordHash = "$2a$11$Dv7mQYRUSnLQuVVpBcUNJ.8DxSQi6.O7nh3eaeWYAVWJ5ROn3YMP2"
-                        });
                 });
 #pragma warning restore 612, 618
         }
